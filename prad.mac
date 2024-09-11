@@ -1,0 +1,30 @@
+# Macro file for PRadSim
+# 
+# To be run preferably in batch, without graphics:
+# % PRadSim run.mac
+#
+# Change the default number of threads (in multi-threaded mode)
+#/run/numberOfWorkers 4
+#
+
+#/tracking/verbose 1
+
+#/pradsim/phys/add emstandard_opt1
+
+/pradsim/gun/type file
+/pradsim/gun/evtype elastic
+/pradsim/gun/path input.dat
+
+#/pradsim/phys/stepmax 10 mm
+/pradsim/gun/ebeam 3500.00 MeV
+#/pradsim/det/hycal wrapped
+
+#/pradsim/gun/target database/a34p51_extended.dat 
+
+/pradsim/det/calorimeter/depthleadglass 1.25 m
+/pradsim/det/calorimeter/reflectance 0.99
+
+/pradsim/event/printmodulo 1000
+
+/run/initialize
+/run/beamOn 5000000

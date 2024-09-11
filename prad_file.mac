@@ -1,0 +1,31 @@
+#target density scaling factor, default is 1
+/pradsim/det/target/densityratio 1
+
+#target material 'hydrogen' for gas hydrogen (default), 'LH2' for liquid hydrogen
+/pradsim/det/target/material LH2
+
+#radius of the target cell, in mm
+/pradsim/det/target/radius 12.5 mm
+
+#half length of the target cell, in mm
+/pradsim/det/target/halfl 35.0 mm
+
+/pradsim/gun/type file
+/pradsim/gun/evtype moller
+/pradsim/gun/path evgen/esepp/ee_pass6_11000.00MeV_1000000_theta_0.4_4.0_COMIN_5_COMAX_10500_total_e-.dat
+
+#energy of the incident particle
+/pradsim/gun/ebeam 11000 MeV
+
+#frequency of printing out current event number
+/pradsim/event/printmodulo 1000
+
+/pradsim/det/sensitive/virtual true
+
+/pradsim/det/calorimeter/depthleadglass 1.25 m
+/pradsim/det/calorimeter/reflectance 0.99
+
+/run/initialize
+
+# the amount of event we want to run
+/run/beamOn 1000000

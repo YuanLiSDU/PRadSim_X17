@@ -1,0 +1,20 @@
+# Macro file for PRadSim
+#
+# To be run preferably in batch, without graphics:
+# % PRadSim run.mac
+#
+# Change the default number of threads (in multi-threaded mode)
+#/run/numberOfWorkers 4
+#
+
+#/run/initialize
+#/run/beamOn 500
+
+/pradsim/gun/type file
+/pradsim/gun/evtype moller
+/pradsim/gun/path input/ee_pass6_2200.00MeV_10000_theta_1.0_1.5_COMIN_3_COMAX_2000_total_e-.dat
+
+/pradsim/gun/ebeam 2200 MeV
+
+/run/initialize
+/run/beamOn 100
