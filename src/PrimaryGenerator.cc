@@ -498,15 +498,15 @@ void PRadPrimaryGenerator::GeneratePrimaryVertex(G4Event *anEvent)
         return;
     }
 
-    double e_l = 0, theta_l = 0, phi_l = 0;
-    double e_h = 0, theta_h = 0, phi_h = 0;
-    double e_p = 0, theta_p = 0, phi_p = 0;
+    double e_l = 0, theta_l = 0, phi_l = 0; //scattered electron
+    double e_d1 = 0, theta_d1 = 0, phi_d1 = 0; //decay electron
+    double e_d2 = 0, theta_d2 = 0, phi_d2 = 0; //decay positron
 
     while (fParser.ParseLine()) {
         if (!fParser.CheckElements(9))
             continue;
         else {
-            fParser >> e_l >> theta_l >> phi_l >> e_h >> theta_h >> phi_h >> e_p >> theta_p >> phi_p;
+            fParser >> e_l >> theta_l >> phi_l >> e_d1 >> theta_d1 >> phi_d1 >> e_d2 >> theta_d2 >> phi_d2;
 	    //G4cout<<e_l<<" "<<theta_l<<" "<<phi_l<<" "<<e_h<<" "<<theta_h<<" "<<phi_h<<" "<<e_p<<" "<<theta_p<<" "<<phi_p<<G4endl;
             break; 
         }
@@ -538,59 +538,51 @@ void PRadPrimaryGenerator::GeneratePrimaryVertex(G4Event *anEvent)
     fTheta[fN] = theta_l;
     fPhi[fN] = phi_l;
     fN++;
+    if(fEventType == "elastic"){
+        G4PrimaryVertex *vertexD1 = new G4PrimaryVertex(x, y, z, 0);
+        G4PrimaryParticle *particleD1 = new G4PrimaryParticle(particleTable->FindParticle("e-"));
+        double m_d1 = particleD1->GetParticleDefinition()->GetPDGMass();
+        double p_d1 = sqrt(e_d1 * e_d1 - m_d1 * m_d1);
+        double kx_d1 = sin(theta_d1) * cos(phi_d1);
+        double ky_d1 = sin(theta_d1) * sin(phi_d1);
+        double kz_d1 = cos(theta_d1);
+        particleD1->SetMomentumDirection(G4ThreeVector(kx_d1, ky_d1, kz_d1));
+        particleD1->SetTotalEnergy(e_d1);
+        vertexD1->SetPrimary(particleD1);
 
-    if (fRecoilOn || fEventType == "moller") {
-        G4PrimaryVertex *vertexH = new G4PrimaryVertex(x, y, z, 0);
-        G4PrimaryParticle *particleH = NULL;
+        anEvent->AddPrimaryVertex(vertexD1);
 
-        if (fEventType == "moller")
-            particleH = new G4PrimaryParticle(particleTable->FindParticle("e-"));
-	    //particleH = new G4PrimaryParticle(particleTable->FindParticle("e+"));
-        else
-            particleH = new G4PrimaryParticle(particleTable->FindParticle(fRecoilParticle));
-
-        double m_h = particleH->GetParticleDefinition()->GetPDGMass();
-        double p_h = sqrt(e_h * e_h - m_h * m_h);
-        double kx_h = sin(theta_h) * cos(phi_h);
-        double ky_h = sin(theta_h) * sin(phi_h);
-        double kz_h = cos(theta_h);
-        particleH->SetMomentumDirection(G4ThreeVector(kx_h, ky_h, kz_h));
-        particleH->SetTotalEnergy(e_h);
-        vertexH->SetPrimary(particleH);
-
-        anEvent->AddPrimaryVertex(vertexH);
-
-        fPID[fN] = particleH->GetPDGcode();
+        fPID[fN] = particleD1->GetPDGcode();
         fX[fN] = x;
         fY[fN] = y;
         fZ[fN] = z;
-        fE[fN] = e_h;
-        fMomentum[fN] = p_h;
-        fTheta[fN] = theta_h;
-        fPhi[fN] = phi_h;
+        fE[fN] = e_d1;
+        fMomentum[fN] = p_d1;
+        fTheta[fN] = theta_d1;
+        fPhi[fN] = phi_d1;
         fN++;
-    }
 
-    if (e_p > 0) {
-        G4PrimaryVertex *vertexP = new G4PrimaryVertex(x, y, z, 0);
-        G4PrimaryParticle *particleP = new G4PrimaryParticle(particleTable->FindParticle("gamma"));
-        double kx_p = sin(theta_p) * cos(phi_p);
-        double ky_p = sin(theta_p) * sin(phi_p);
-        double kz_p = cos(theta_p);
-        particleP->SetMomentumDirection(G4ThreeVector(kx_p, ky_p, kz_p));
-        particleP->SetTotalEnergy(e_p);
-        vertexP->SetPrimary(particleP);
+        G4PrimaryVertex *vertexD2 = new G4PrimaryVertex(x, y, z, 0);
+        G4PrimaryParticle *particleD2 = new G4PrimaryParticle(particleTable->FindParticle("e+"));
+        double m_d2 = particleD2->GetParticleDefinition()->GetPDGMass();
+        double p_d2 = sqrt(e_d2 * e_d2 - m_d2 * m_d2);
+        double kx_d2 = sin(theta_d2) * cos(phi_d2);
+        double ky_d2 = sin(theta_d2) * sin(phi_d2);
+        double kz_d2 = cos(theta_d2);
+        particleD2->SetMomentumDirection(G4ThreeVector(kx_d2, ky_d2, kz_d2));
+        particleD2->SetTotalEnergy(e_d2);
+        vertexD2->SetPrimary(particleD2);
 
-        anEvent->AddPrimaryVertex(vertexP);
+        anEvent->AddPrimaryVertex(vertexD2);
 
-        fPID[fN] = particleP->GetPDGcode();
+        fPID[fN] = particleD2->GetPDGcode();
         fX[fN] = x;
         fY[fN] = y;
         fZ[fN] = z;
-        fE[fN] = e_p;
-        fMomentum[fN] = e_p;
-        fTheta[fN] = theta_p;
-        fPhi[fN] = phi_p;
+        fE[fN] = e_d2;
+        fMomentum[fN] = p_d2;
+        fTheta[fN] = theta_d2;
+        fPhi[fN] = phi_d2;
         fN++;
     }
 

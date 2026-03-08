@@ -77,6 +77,12 @@ protected:
     std::vector<double> fX;
     std::vector<double> fY;
     std::vector<double> fZ;
+    std::vector<double> fXIn;
+    std::vector<double> fYIn;
+    std::vector<double> fZIn;
+    std::vector<double> fXOut;
+    std::vector<double> fYOut;
+    std::vector<double> fZOut;
     std::vector<double> fMomentum;
     std::vector<double> fTheta;
     std::vector<double> fPhi;

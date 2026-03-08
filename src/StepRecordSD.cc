@@ -56,12 +56,14 @@
 #include "G4VSensitiveDetector.hh"
 
 #include "G4ThreeVector.hh"
+#include <functional>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 StepRecordSD::StepRecordSD(G4String name, G4String abbrev) : G4VSensitiveDetector(name), fAbbrev(abbrev), fRegistered(false)
 {
-    fID = name.hash() % 100000;
+    //fID = name.hash() % 100000;
+    fID = std::hash<std::string>()(name) % 100000;
     //G4cout << name << "\t" << fAbbrev << "\t" << fID << G4endl;
 
     fN = 0;
@@ -111,6 +113,7 @@ G4bool StepRecordSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
     G4ThreeVector InPos = preStepPoint->GetPosition();
     G4ThreeVector InMom = preStepPoint->GetMomentum();
+    G4ThreeVector OutPos = aStep->GetPostStepPoint()->GetPosition();
 
     G4int ProcessID = -1;
 
@@ -123,6 +126,9 @@ G4bool StepRecordSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     fX.push_back(InPos.x());
     fY.push_back(InPos.y());
     fZ.push_back(InPos.z());
+    fXOut.push_back(OutPos.x());
+    fYOut.push_back(OutPos.y());
+    fZOut.push_back(OutPos.z());
     fMomentum.push_back(InMom.mag());
     fTheta.push_back(InMom.theta());
     fPhi.push_back(InMom.phi());
@@ -146,6 +152,9 @@ void StepRecordSD::Register(TTree *tree)
     tree->Branch(Form("%s.X", abbr), &fX);
     tree->Branch(Form("%s.Y", abbr), &fY);
     tree->Branch(Form("%s.Z", abbr), &fZ);
+    tree->Branch(Form("%s.XOut", abbr), &fXOut);
+    tree->Branch(Form("%s.YOut", abbr), &fYOut);
+    tree->Branch(Form("%s.ZOut", abbr), &fZOut);
     tree->Branch(Form("%s.P", abbr), &fMomentum);
     tree->Branch(Form("%s.Theta", abbr), &fTheta);
     tree->Branch(Form("%s.Phi", abbr), &fPhi);
@@ -162,6 +171,9 @@ void StepRecordSD::Clear()
     fX.clear();
     fY.clear();
     fZ.clear();
+    fXOut.clear();
+    fYOut.clear();
+    fZOut.clear();
     fMomentum.clear();
     fTheta.clear();
     fPhi.clear();

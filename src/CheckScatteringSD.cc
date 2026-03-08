@@ -53,12 +53,14 @@
 #include "G4VSensitiveDetector.hh"
 
 #include "G4ThreeVector.hh"
+#include <functional>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 CheckScatteringSD::CheckScatteringSD(G4String name, G4String abbrev) : G4VSensitiveDetector(name), fAbbrev(abbrev), fRegistered(false)
 {
-    fID = name.hash() % 100000;
+    //fID = name.hash() % 100000;
+    fID = std::hash<std::string>()(name) % 100000;
     //G4cout << name << "\t" << fAbbrev << "\t" << fID << G4endl;
 
     fCoulomb = false;

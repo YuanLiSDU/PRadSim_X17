@@ -2,13 +2,13 @@
 /pradsim/det/target/densityratio 1
 
 #target material 'hydrogen' for gas hydrogen (default), 'LH2' for liquid hydrogen
-/pradsim/det/target/material LH2
+/pradsim/det/target/material Ta
 
 #radius of the target cell, in mm
-/pradsim/det/target/radius 8.0 mm
+/pradsim/det/target/radius 25.00 mm
 
 #half length of the target cell, in mm
-/pradsim/det/target/halfl 25.0 mm
+/pradsim/det/target/halfl 0.002 mm
 
 #gun tyle, DON'T change it for beam-on-target simulation
 /pradsim/gun/type point
@@ -17,7 +17,7 @@
 /pradsim/gun/pos 0 0 -4800 mm
 
 #pid of the incident particle, can be e- or e+
-/pradsim/gun/gunpid e+
+/pradsim/gun/gunpid e-
 
 #energy of the incident particle
 /pradsim/gun/ebeam 2200 MeV
@@ -35,4 +35,4 @@
 /run/initialize
 
 # the amount of event we want to run
-/run/beamOn 100000
+/run/beamOn 250000000

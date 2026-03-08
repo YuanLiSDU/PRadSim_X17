@@ -67,7 +67,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 //static const G4double ZCRFrontSurf = 273.515 * cm;
-static const G4double ZCRFrontSurf = (295.00 + 0.0) * cm;
+//static const G4double ZCRFrontSurf = (295.00 + 0.0) * cm;
+static const G4double ZCRFrontSurf = 7506.464 * mm + -455.0 * cm;
 //static const G4double ZCRBackSurf = ZCRFrontSurf + 18.0 * cm;
 static const G4double ZLGFrontSurf = ZCRFrontSurf - 9.73 * cm;
 static const G4double ZLGBackSurf = ZLGFrontSurf + 45.0 * cm;
@@ -328,9 +329,9 @@ void CalorimeterSD::EndOfEvent(G4HCofThisEvent *HCE)
         fX[i] = aHit->GetInPos().x();
         fY[i] = aHit->GetInPos().y();
         fZ[i] = aHit->GetInPos().z();
-        fOutX[i] = aHit->GetOutPos().x();
-        fOutY[i] = aHit->GetOutPos().y();
-        fOutZ[i] = aHit->GetOutPos().z();
+        fXOut[i] = aHit->GetOutPos().x();
+        fYOut[i] = aHit->GetOutPos().y();
+        fZOut[i] = aHit->GetOutPos().z();
         fVX[i] = aHit->GetVertexPos().x();
         fVY[i] = aHit->GetVertexPos().y();
         fVZ[i] = aHit->GetVertexPos().z();

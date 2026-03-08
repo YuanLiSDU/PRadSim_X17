@@ -135,6 +135,8 @@ private:
     G4bool fHyCalSDOn;
     G4bool fVirtualSDOn;
 
+    G4bool UseShielding;
+
     G4double fAttenuationLG;
     G4double fReflectanceLG;
 

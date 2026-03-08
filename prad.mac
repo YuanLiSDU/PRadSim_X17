@@ -13,10 +13,10 @@
 
 /pradsim/gun/type file
 /pradsim/gun/evtype elastic
-/pradsim/gun/path input.dat
+/pradsim/gun/path output/Uniform_signal_660-1540MeV.dat
 
 #/pradsim/phys/stepmax 10 mm
-/pradsim/gun/ebeam 3500.00 MeV
+#/pradsim/gun/ebeam 3500.00 MeV
 #/pradsim/det/hycal wrapped
 
 #/pradsim/gun/target database/a34p51_extended.dat 
@@ -27,4 +27,4 @@
 /pradsim/event/printmodulo 1000
 
 /run/initialize
-/run/beamOn 5000000
+/run/beamOn 100000

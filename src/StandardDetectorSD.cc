@@ -55,12 +55,14 @@
 #include "G4VSensitiveDetector.hh"
 
 #include "G4ThreeVector.hh"
+#include <functional>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 StandardDetectorSD::StandardDetectorSD(G4String name, G4String abbrev) : G4VSensitiveDetector(name), fAbbrev(abbrev), fHitsCollection(NULL), fRegistered(false)
 {
-    fID = name.hash() % 100000;
+    //fID = name.hash() % 100000;
+    fID = std::hash<std::string>()(name) % 100000;
     //G4cout << name << "\t" << fAbbrev << "\t" << fID << G4endl;
 
     G4String cname = "Coll";
@@ -77,15 +79,15 @@ StandardDetectorSD::StandardDetectorSD(G4String name, G4String abbrev) : G4VSens
         fX[i] = 1e+38;
         fY[i] = 1e+38;
         fZ[i] = 1e+38;
+        fXOut[i] = 1e+38;
+        fYOut[i] = 1e+38;
+        fZOut[i] = 1e+38;
         fMomentum[i] = 1e+38;
         fTheta[i] = 1e+38;
         fPhi[i] = 1e+38;
         fTime[i] = 1e+38;
         fEdep[i] = 1e+38;
         fTrackL[i] = 1e+38;
-	fOutX[i] = 1e+38;
-	fOutY[i] = 1e+38;
-	fOutZ[i] = 1e+38;
     }
 }
 
@@ -240,6 +242,9 @@ void StandardDetectorSD::EndOfEvent(G4HCofThisEvent *HCE)
         fX[i] = aHit->GetInPos().x();
         fY[i] = aHit->GetInPos().y();
         fZ[i] = aHit->GetInPos().z();
+        fXOut[i] = aHit->GetOutPos().x();
+        fYOut[i] = aHit->GetOutPos().y();
+        fZOut[i] = aHit->GetOutPos().z();
         fMomentum[i] = aHit->GetInMom().mag();
         fTheta[i] = aHit->GetInMom().theta();
         fPhi[i] = aHit->GetInMom().phi();
@@ -265,12 +270,12 @@ void StandardDetectorSD::Register(TTree *tree)
     tree->Branch(Form("%s.X", abbr), fX, Form("%s.X[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.Y", abbr), fY, Form("%s.Y[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.Z", abbr), fZ, Form("%s.Z[%s.N]/D", abbr, abbr));
+    tree->Branch(Form("%s.Xout", abbr), fXOut, Form("%s.Xout[%s.N]/D", abbr, abbr));
+    tree->Branch(Form("%s.Yout", abbr), fYOut, Form("%s.Yout[%s.N]/D", abbr, abbr));
+    tree->Branch(Form("%s.Zout", abbr), fZOut, Form("%s.Zout[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.VX", abbr), fVX, Form("%s.VX[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.VY", abbr), fVY, Form("%s.VY[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.VZ", abbr), fVZ, Form("%s.VZ[%s.N]/D", abbr, abbr));
-    tree->Branch(Form("%s.OutX", abbr), fOutX, Form("%s.OutX[%s.N]/D", abbr, abbr));
-    tree->Branch(Form("%s.OutY", abbr), fOutY, Form("%s.OutY[%s.N]/D", abbr, abbr));
-    tree->Branch(Form("%s.OutZ", abbr), fOutZ, Form("%s.OutZ[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.P", abbr), fMomentum, Form("%s.P[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.Theta", abbr), fTheta, Form("%s.Theta[%s.N]/D", abbr, abbr));
     tree->Branch(Form("%s.Phi", abbr), fPhi, Form("%s.Phi[%s.N]/D", abbr, abbr));
@@ -291,12 +296,12 @@ void StandardDetectorSD::Clear()
         fX[i] = 1e+38;
         fY[i] = 1e+38;
         fZ[i] = 1e+38;
+        fXOut[i] = 1e+38;
+        fYOut[i] = 1e+38;
+        fZOut[i] = 1e+38;
         fVX[i] = 1e+38;
         fVY[i] = 1e+38;
         fVZ[i] = 1e+38;
-	fOutX[i] = 1e+38;
-        fOutY[i] = 1e+38;
-        fOutZ[i] = 1e+38;
         fMomentum[i] = 1e+38;
         fTheta[i] = 1e+38;
         fPhi[i] = 1e+38;

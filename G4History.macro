@@ -4,8 +4,8 @@
 /pradsim/det/target/halfl 0.0005 mm
 /run/initialize
 /control/execute vis.mac
-/vis/open OGL 600x600-0+0
-/vis/sceneHandler/create OGL
+/vis/open OGLSQt 600x600-0+0
+/vis/sceneHandler/create OGLSQt
 /vis/viewer/create ! ! 600x600-0+0
 /vis/viewer/refresh
 /vis/viewer/set/autoRefresh false
