@@ -1,0 +1,29 @@
+# CMake build artifacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Generated executables and libraries
+/PRadSim
+/PRadDig
+/PRadRec
+/libprana.so
+digitization/PRadDig
+digitization/PRadRec
+digitization/CMakeFiles/
+
+# Simulation output
+output/
+*.root
+*.output
+*.log
+
+# Editor and Python cache files
+.qt/
+.vscode/
+.idea/
+__pycache__/
+*.py[cod]
+*.swp
