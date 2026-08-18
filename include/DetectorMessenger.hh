@@ -76,6 +76,8 @@ private:
     G4UIcmdWithADoubleAndUnit *TargetRCmd;
     G4UIcmdWithADoubleAndUnit *TargetHalfLCmd;
     G4UIcmdWithAString        *TargetMatCmd;
+    G4UIcmdWithAString        *TubeCmd;
+    G4UIcmdWithABool          *ShieldingCmd;
     G4UIcmdWithADouble        *TargetDensityRatioCmd;
     G4UIdirectory             *RecoilDetDir;
     G4UIcmdWithAnInteger      *RecoilDetNSegCmd;

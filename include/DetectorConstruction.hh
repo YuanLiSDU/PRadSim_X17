@@ -72,6 +72,8 @@ public:
 
     inline void SetTargetMaterial(G4String val);
     inline void SetTargetDensityRatio(G4double r);
+    inline void SetTubeOption(G4String val);
+    inline void SetUseShielding(G4bool val);
 
     inline void SetExtDensityRatio(G4double r);
 
@@ -137,6 +139,8 @@ private:
 
     G4bool UseShielding;
 
+    G4String fTubeOption;
+
     G4double fAttenuationLG;
     G4double fReflectanceLG;
 
@@ -198,6 +202,16 @@ inline void DetectorConstruction::SetTargetMaterial(G4String val)
 inline void DetectorConstruction::SetTargetDensityRatio(G4double r)
 {
     fTargetDensityRatio = r;
+}
+
+inline void DetectorConstruction::SetTubeOption(G4String val)
+{
+    fTubeOption = val;
+}
+
+inline void DetectorConstruction::SetUseShielding(G4bool val)
+{
+    UseShielding = val;
 }
 
 inline void DetectorConstruction::SetExtDensityRatio(G4double r)

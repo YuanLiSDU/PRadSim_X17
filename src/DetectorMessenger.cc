@@ -110,6 +110,15 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction *det) : G4UImessenger(
     TargetMatCmd->SetParameterName("targetm", false);
     TargetMatCmd->SetCandidates("hydrogen deuteron LH2 Ta");
 
+    TubeCmd = new G4UIcmdWithAString("/pradsim/det/tube", this);
+    TubeCmd->SetGuidance("Choose the beam tube geometry.");
+    TubeCmd->SetParameterName("tube", false);
+    TubeCmd->SetCandidates("HeBag CFRPTube CFRPTube_PRadWin");
+
+    ShieldingCmd = new G4UIcmdWithABool("/pradsim/det/shielding", this);
+    ShieldingCmd->SetGuidance("Enable GEM low energy background shielding.");
+    ShieldingCmd->SetParameterName("shielding", false);
+
     TargetDensityRatioCmd = new G4UIcmdWithADouble("/pradsim/det/target/densityratio", this);
     TargetDensityRatioCmd->SetGuidance("Set fTargetDensityRatio");
     TargetDensityRatioCmd->SetParameterName("targetr", false);
@@ -209,6 +218,8 @@ DetectorMessenger::~DetectorMessenger()
     delete TargetRCmd;
     delete TargetHalfLCmd;
     delete TargetMatCmd;
+    delete TubeCmd;
+    delete ShieldingCmd;
     delete TargetDensityRatioCmd;
     delete TargetDir;
     delete TargetZCmd;
@@ -252,6 +263,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand *command, G4String newValue)
 
     if (command == TargetMatCmd)
         Detector->SetTargetMaterial(newValue);
+
+    if (command == TubeCmd)
+        Detector->SetTubeOption(newValue);
+
+    if (command == ShieldingCmd)
+        Detector->SetUseShielding(ShieldingCmd->GetNewBoolValue(newValue));
 
     if (command == TargetDensityRatioCmd)
         Detector->SetTargetDensityRatio(TargetDensityRatioCmd->GetNewDoubleValue(newValue));

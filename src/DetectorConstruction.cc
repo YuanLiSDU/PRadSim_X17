@@ -136,7 +136,11 @@ DetectorConstruction::DetectorConstruction(G4String conf) : G4VUserDetectorConst
         fVirtualSDOn = true;
     }
 
-    UseShielding = true;
+    UseShielding = false;
+
+    //different beam tube options
+    // "HeBag", "CFRPTube", "CFRPTube_PRadWin"
+    fTubeOption = "CFRPTube_PRadWin";
 
     fAttenuationLG = 0.0;
     fReflectanceLG = 1.0;
@@ -379,6 +383,16 @@ void DetectorConstruction::DefineMaterials()
     Rohacell->AddElement(O, natoms = 2);
     fVisAtts[Rohacell->GetName()] = new G4VisAttributes(G4Colour::Grey());
 
+    //polymethacrylimide(PMI), Rohacell, various densities from 30 - 110 kg/m3,
+    // currently using a density of  110 kg / m3 (0.110 g/cm3)
+    G4Material *PMI = new G4Material("PMI", density = 0.110 * g / cm3, ncomponents = 4);
+    PMI->AddElement(C, natoms = 4);
+    PMI->AddElement(H, natoms = 7);
+    PMI->AddElement(N, natoms = 1);
+    PMI->AddElement(O, natoms = 1);
+    fVisAtts[PMI->GetName()] = new G4VisAttributes(G4Colour::Green());
+    fVisAtts[PMI->GetName()]->SetForceSolid(true);
+
     // Tungsten
     G4Material *Tungsten = new G4Material("Tungsten", density = 19.25 * g / cm3, ncomponents = 1);
     Tungsten->AddElement(W, natoms = 1);
@@ -446,13 +460,21 @@ void DetectorConstruction::DefineMaterials()
     fVisAtts[VirtualDetM->GetName()] = new G4VisAttributes(G4Colour::Cyan());
     fVisAtts[VirtualDetM->GetName()]->SetForceSolid(true);
 
-    
     //Viton
     G4Material *Viton = new G4Material("Viton", density = 2.5 * g / cm3, ncomponents = 3); // HFP, VF2
     Viton->AddElement(C, natoms = 5);
     Viton->AddElement(H, natoms = 2);
     Viton->AddElement(F, natoms = 8);
     fVisAtts[Viton->GetName()] = new G4VisAttributes(G4Colour::Red());
+
+    // Carbon fiber reinforced polymer (CFRP) ~1.7 g/cm3, use 2.0 g/cm3 for simulation
+    G4Material *CFRP = new G4Material("CFRP", density = 1.7 * g / cm3, ncomponents = 4);
+    CFRP->AddElement(C, fractionmass = 0.875);
+    CFRP->AddElement(H, fractionmass = 0.025);
+    CFRP->AddElement(O, fractionmass = 0.045);
+    CFRP->AddElement(N, fractionmass = 0.055);
+    fVisAtts[CFRP->GetName()] = new G4VisAttributes(G4Colour::Gray());
+    fVisAtts[CFRP->GetName()]->SetForceSolid(true);
 
     // Print out material table
     G4cout << *(G4Material::GetMaterialTable()) << G4endl;
@@ -890,6 +912,8 @@ void DetectorConstruction::AddVaccumBox(G4LogicalVolume *mother)
     G4Material *WindowAndTubeM3 = G4Material::GetMaterial("Viton");
     G4Material *TubeGasM = G4Material::GetMaterial("HeGas");
     G4Material *ShieldingM = G4Material::GetMaterial("Aluminum");
+    G4Material *CFRPTubeM = G4Material::GetMaterial("CFRP");
+    G4Material *TubeFlangeM = G4Material::GetMaterial("PMI");
 
     // Target chamber
     // For now, only built the downstream chamber with window
@@ -929,40 +953,86 @@ void DetectorConstruction::AddVaccumBox(G4LogicalVolume *mother)
     G4VSolid *solidVacBox = new G4Polycone("VacuumBoxS", 0, twopi, 6, zPlane2, rInner2, rOuter2);
     G4LogicalVolume *logicVacBox = new G4LogicalVolume(solidVacBox, VacuumBoxM, "VacuumBoxLV");
     new G4PVPlacement(0, G4ThreeVector(0, 0, fVacBoxCenter - VacBoxHalfL), logicVacBox, "Vacuum Box", mother, false, 0);
+
+    //The Vacuum Tank Window models imported from CAD
+    auto Window9 = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Solid008.stl");//window adapter, aluminum
+	Window9->SetScale(1);											
+	Window9->SetOffset(0, 0, fTargetCenter);										
+    G4LogicalVolume *logicalWindow9 = new G4LogicalVolume(Window9->GetSolid(), WindowAndTubeM1, "Window9LV");
+    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicalWindow9, "Window9", mother, false, 0);
+
+    auto Window10 = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Solid009.stl");//small window flange, aluminum
+	Window10->SetScale(1);											
+	Window10->SetOffset(0, 0, fTargetCenter);										
+    G4LogicalVolume *logicalWindow10 = new G4LogicalVolume(Window10->GetSolid(), WindowAndTubeM1, "Window10LV");
+    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicalWindow10, "Window10", mother, false, 0);
+
+    auto Window11 = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Solid010.stl");//X17 small window, aluminum
+	Window11->SetScale(1);											
+	Window11->SetOffset(0, 0, fTargetCenter);										
+    G4LogicalVolume *logicalWindow11 = new G4LogicalVolume(Window11->GetSolid(), WindowAndTubeM1, "Window11LV");
+    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicalWindow11, "Window11", mother, false, 0);
     
     // He Bag
-    //dimension from Bob or Chris
-    G4double VacTubeOR = 1.375 * 2.54 * cm * 0.5; 
-    G4double VacTubeIR = VacTubeOR - 0.075 * mm;
-    //G4double VacTubeL = 2387.6 * mm;
-    G4double VacTubeL = 2745. * mm;
-    G4VSolid *solidHeTube = new G4Tubs("VacuumTubeS", VacTubeIR, VacTubeOR, VacTubeL / 2.0, 0, twopi);
-    G4LogicalVolume *logicHeTube = new G4LogicalVolume(solidHeTube, VacuumTubeM, "HeTubeLV");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 7736.93 * mm), logicHeTube, "He Tube", mother, false, 0);
-    G4VSolid *solidHeGas = new G4Tubs("HeGasTubeS", 0, VacTubeIR, VacTubeL / 2.0, 0, twopi);
-    G4LogicalVolume *logicHeGas = new G4LogicalVolume(solidHeGas, TubeGasM, "HeGasLV");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 7736.93 * mm), logicHeGas, "He Gas", mother, false, 0);
+    if (fTubeOption == "HeBag") {
+        //dimension from Bob or Chris
+        G4double VacTubeOR = 1.375 * 2.54 * cm * 0.5; 
+        G4double VacTubeIR = VacTubeOR - 0.075 * mm;
+        //G4double VacTubeL = 2387.6 * mm;
+        G4double VacTubeL = 2745. * mm;
+        G4VSolid *solidHeTube = new G4Tubs("VacuumTubeS", VacTubeIR, VacTubeOR, VacTubeL / 2.0, 0, twopi);
+        G4LogicalVolume *logicHeTube = new G4LogicalVolume(solidHeTube, VacuumTubeM, "HeTubeLV");
+        new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 7736.93 * mm), logicHeTube, "He Tube", mother, false, 0);
+        G4VSolid *solidHeGas = new G4Tubs("HeGasTubeS", 0, VacTubeIR, VacTubeL / 2.0, 0, twopi);
+        G4LogicalVolume *logicHeGas = new G4LogicalVolume(solidHeGas, TubeGasM, "HeGasLV");
+        new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 7736.93 * mm), logicHeGas, "He Gas", mother, false, 0);
 
-    G4VSolid *solidThickWindow = new G4Tubs("ThickWindowS", 7.5 * mm, 22.* mm, 0.55 * mm / 2.0, 0, twopi);
-    G4LogicalVolume *logicThickWindow = new G4LogicalVolume(solidThickWindow, VacuumBoxM, "Vacuum Window with hole");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 6361.11 * mm), logicThickWindow, "Vacuum Window with hole", mother, false, 0);
+        G4VSolid *solidThickWindow = new G4Tubs("ThickWindowS", 7.5 * mm, 22.* mm, 0.55 * mm / 2.0, 0, twopi);
+        G4LogicalVolume *logicThickWindow = new G4LogicalVolume(solidThickWindow, VacuumBoxM, "Vacuum Window with hole");
+        new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 6361.11 * mm), logicThickWindow, "Vacuum Window with hole", mother, false, 0);
 
-    G4VSolid *solidHoleWindow = new G4Tubs("HoleWindowS", 0, 17.5 * mm, 0.03 * mm / 2.0, 0, twopi);
-    G4LogicalVolume *logicHoleWindow = new G4LogicalVolume(solidHoleWindow, VacuumBoxM, "Vacuum Window Hole Window");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 6361.11 * mm + 0.9 * mm), logicHoleWindow, "Vacuum Hole Window", mother, false, 0);
+        G4VSolid *solidHoleWindow = new G4Tubs("HoleWindowS", 0, 17.5 * mm, 0.03 * mm / 2.0, 0, twopi);
+        G4LogicalVolume *logicHoleWindow = new G4LogicalVolume(solidHoleWindow, VacuumBoxM, "Vacuum Window Hole Window");
+        new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 6361.11 * mm + 0.9 * mm), logicHoleWindow, "Vacuum Hole Window", mother, false, 0);
+    }
+    // Carbon fiber vacuum tube and Rohacell flange connecting with Vacuum Window
+    if (fTubeOption == "CFRPTube" || fTubeOption == "CFRPTube_PRadWin") {
+        // Code for Carbon fiber vacuum tube and Rohacell flange connecting with Vacuum Window
+        G4double CFRPTubeIR = 3.175 * cm / 2.0 - 0.6 * mm; // 1.25 inch
+        G4double CFRPTubeOR = 3.49 * cm / 2.0 - 0.6 * mm; // 1.374 inch
+        G4double CFRPTubeL = 2745. * mm;
+        G4VSolid *solidCFRPTube = new G4Tubs("CFRPTubeS", CFRPTubeIR, CFRPTubeOR, CFRPTubeL / 2.0, 0, twopi);
+        G4LogicalVolume *logicCFRPTube = new G4LogicalVolume(solidCFRPTube, CFRPTubeM, "CFRPTubeLV");
+        new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 7745.5 * mm), logicCFRPTube, "CFRP Tube", mother, false, 0);
 
-    G4VSolid *solidVirtualDetWin = new G4Tubs("VirtualDetWindowS", 2.*cm, 10. * cm, 0.001 * mm, 0, twopi);
-    G4LogicalVolume *logicVirtualDetWin = new G4LogicalVolume(solidVirtualDetWin, G4Material::GetMaterial("VirtualDetM"), "VirtualDetWindowLV");
-    //new G4PVPlacement(0, G4ThreeVector(0, 0, fTargetCenter + 6361.11 * mm + 0.9 * mm + 25.*mm), logicVirtualDetWin, "Virtual Detector Window", mother, false, 0);
-
-    //new shielding around beam pipe 
-    G4double ShieldTubeL1 = 22.0 * cm;
-    G4double ShieldTubeL2 = 26.0 * cm;
-    G4double ShieldCenter1 = fGEMCenter[0] - 70.0 * mm - ShieldTubeL1 / 2.0;
-    G4double ShieldCenter2 = (fGEMCenter[0] + fGEMCenter[1]) / 2.0;
+        if (fTubeOption == "CFRPTube") {
+            auto TubeFlange = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Rohacell_flange.stl");
+            TubeFlange->SetScale(1.0);
+            //Rotate 90 degrees around Y axis
+            G4RotationMatrix *rotY90 = new G4RotationMatrix();
+            rotY90->rotateY(90. * deg);
+            G4LogicalVolume *logicTubeFlange = new G4LogicalVolume(TubeFlange->GetSolid(), TubeFlangeM, "TubeFlangeLV");
+            new G4PVPlacement(rotY90, G4ThreeVector(0, 0, fTargetCenter + 6363. * mm), logicTubeFlange, "Tube Flange", mother, false, 0);
+        }
+        if (fTubeOption == "CFRPTube_PRadWin") {
+            auto TubeFlange = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Rohacell_flange_fitPRadWin.stl");
+            TubeFlange->SetScale(1.0);
+            //Rotate 90 degrees around Y axis
+            G4RotationMatrix *rotY90 = new G4RotationMatrix();
+            rotY90->rotateY(90. * deg);
+            G4LogicalVolume *logicTubeFlange = new G4LogicalVolume(TubeFlange->GetSolid(), TubeFlangeM, "TubeFlangeLV");
+            new G4PVPlacement(rotY90, G4ThreeVector(0, 0, fTargetCenter + 6363. * mm), logicTubeFlange, "Tube Flange", mother, false, 0);
+        }
+    }
 
     //rectuangular shielding
     if(UseShielding){
+        //GEM low energy backgrounds shielding around beam pipe 
+        G4double ShieldTubeL1 = 22.0 * cm;
+        G4double ShieldTubeL2 = 26.0 * cm;
+        G4double ShieldCenter1 = fGEMCenter[0] - 70.0 * mm - ShieldTubeL1 / 2.0;
+        G4double ShieldCenter2 = (fGEMCenter[0] + fGEMCenter[1]) / 2.0;
+
         G4double ShieldBoxThickness = 1.0 * mm;
         G4double ShieldBoxHalfXY0 = (ShieldCenter1 - fTargetCenter - ShieldTubeL1 / 2.0) * 35.0 / (fGEMCenter[0] - fTargetCenter);
         G4double ShieldBoxHalfXY1 = (ShieldCenter1 - fTargetCenter + ShieldTubeL1 / 2.0) * 35.0 / (fGEMCenter[0] - fTargetCenter);
@@ -985,27 +1055,6 @@ void DetectorConstruction::AddVaccumBox(G4LogicalVolume *mother)
         G4LogicalVolume *logicShieldBox2 = new G4LogicalVolume(solidShieldBox2, ShieldingM, "ShieldBox2LV");
         new G4PVPlacement(0, G4ThreeVector(0, 0, ShieldCenter2), logicShieldBox2, "Shielding Box", mother, false, 0);
     }
-
-
-    //imported from CAD
-    auto Window9 = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Solid008.stl");//window adapter, aluminum
-	Window9->SetScale(1);											
-	Window9->SetOffset(0, 0, fTargetCenter);										
-    G4LogicalVolume *logicalWindow9 = new G4LogicalVolume(Window9->GetSolid(), WindowAndTubeM1, "Window9LV");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicalWindow9, "Window9", mother, false, 0);
-
-    auto Window10 = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Solid009.stl");//small window flange, aluminum
-	Window10->SetScale(1);											
-	Window10->SetOffset(0, 0, fTargetCenter);										
-    G4LogicalVolume *logicalWindow10 = new G4LogicalVolume(Window10->GetSolid(), WindowAndTubeM1, "Window10LV");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicalWindow10, "Window10", mother, false, 0);
-
-    auto Window11 = CADMesh::TessellatedMesh::FromSTL("database/CADmodel/Solid010.stl");//X17 small window, aluminum
-	Window11->SetScale(1);											
-	Window11->SetOffset(0, 0, fTargetCenter);										
-    G4LogicalVolume *logicalWindow11 = new G4LogicalVolume(Window11->GetSolid(), WindowAndTubeM1, "Window11LV");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicalWindow11, "Window11", mother, false, 0);							
-    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1305,7 +1354,7 @@ void DetectorConstruction::AddHyCal(G4LogicalVolume *mother)
     // HyCal container
     G4double HyCalBoxCenter = PbGlassCenter - 9.0 * cm + 30.0 * cm; // Check
     G4Box *HyCalConNoHole = new G4Box("HyCalConNoHole", 80.0 * cm, 80.0 * cm, 65.0 * cm);
-    G4Tubs *HyCalConHole = new G4Tubs("HyCalConHole", 0, 31.75 * mm, 66.0 * cm, 0, twopi);
+    G4Tubs *HyCalConHole = new G4Tubs("HyCalConHole", 0, 31.75 * mm / 2. + 1.5 * mm, 66.0 * cm, 0, twopi);
     G4SubtractionSolid *solidHyCalCon = new G4SubtractionSolid("HyCalConS", HyCalConNoHole, HyCalConHole);
     G4LogicalVolume *logicHyCalCon = new G4LogicalVolume(solidHyCalCon, HyCalConM, "HyCalConLV");
     new G4PVPlacement(0, G4ThreeVector(0, 0, HyCalBoxCenter), logicHyCalCon, "HyCal Container", mother, false, 0);

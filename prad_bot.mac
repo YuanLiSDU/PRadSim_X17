@@ -20,7 +20,7 @@
 /pradsim/gun/gunpid e-
 
 #energy of the incident particle
-/pradsim/gun/ebeam 2200 MeV
+/pradsim/gun/ebeam 2239 MeV
 
 #frequency of printing out current event number
 /pradsim/event/printmodulo 100000
@@ -32,7 +32,13 @@
 
 #/pradsim/det/sensitive/target true
 
+#choose beam tube: HeBag, CFRPTube, or CFRPTube_PRadWin
+/pradsim/det/tube CFRPTube_PRadWin
+
+# whether to use the GEM low energy background shielding
+/pradsim/det/shielding false
+
 /run/initialize
 
 # the amount of event we want to run
-/run/beamOn 250000000
+/run/beamOn 100000000
