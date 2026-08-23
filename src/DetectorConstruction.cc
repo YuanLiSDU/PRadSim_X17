@@ -383,8 +383,7 @@ void DetectorConstruction::DefineMaterials()
     Rohacell->AddElement(O, natoms = 2);
     fVisAtts[Rohacell->GetName()] = new G4VisAttributes(G4Colour::Grey());
 
-    //polymethacrylimide(PMI), Rohacell, various densities from 30 - 110 kg/m3,
-    // currently using a density of  110 kg / m3 (0.110 g/cm3)
+    //polymethacrylimide(PMI), Rohacell
     G4Material *PMI = new G4Material("PMI", density = 0.110 * g / cm3, ncomponents = 4);
     PMI->AddElement(C, natoms = 4);
     PMI->AddElement(H, natoms = 7);
@@ -467,12 +466,12 @@ void DetectorConstruction::DefineMaterials()
     Viton->AddElement(F, natoms = 8);
     fVisAtts[Viton->GetName()] = new G4VisAttributes(G4Colour::Red());
 
-    // Carbon fiber reinforced polymer (CFRP) ~1.7 g/cm3, use 2.0 g/cm3 for simulation
-    G4Material *CFRP = new G4Material("CFRP", density = 1.7 * g / cm3, ncomponents = 4);
-    CFRP->AddElement(C, fractionmass = 0.875);
-    CFRP->AddElement(H, fractionmass = 0.025);
-    CFRP->AddElement(O, fractionmass = 0.045);
-    CFRP->AddElement(N, fractionmass = 0.055);
+    // Carbon fiber reinforced polymer (CFRP)
+    G4Material *CFRP = new G4Material("CFRP", density = 1.52 * g / cm3, ncomponents = 4);
+    CFRP->AddElement(C, fractionmass = 0.90);
+    CFRP->AddElement(H, fractionmass = 0.02);
+    CFRP->AddElement(O, fractionmass = 0.04);
+    CFRP->AddElement(N, fractionmass = 0.04);
     fVisAtts[CFRP->GetName()] = new G4VisAttributes(G4Colour::Gray());
     fVisAtts[CFRP->GetName()]->SetForceSolid(true);
 

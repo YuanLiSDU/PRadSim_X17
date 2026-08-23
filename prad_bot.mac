@@ -8,7 +8,7 @@
 /pradsim/det/target/radius 25.00 mm
 
 #half length of the target cell, in mm
-/pradsim/det/target/halfl 0.002 mm
+/pradsim/det/target/halfl 0.0005 mm
 
 #gun tyle, DON'T change it for beam-on-target simulation
 /pradsim/gun/type point
@@ -41,4 +41,4 @@
 /run/initialize
 
 # the amount of event we want to run
-/run/beamOn 100000000
+/run/beamOn 200000000
